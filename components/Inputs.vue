@@ -4,14 +4,27 @@
       <v-col cols="12">
         <p>{{ total_lines }} lines | {{ total_dup }} duplicate/s</p>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="4" lg="5">
         <v-textarea rows="12" no-resize variant="outlined" label="Input" v-model='input_data'
                     @change="joinText" color="primary"></v-textarea>
       </v-col>
 
-      <v-col cols="12" md="6">
-        <v-textarea rows="12" label="Output" v-model='output_data' variant="outlined"
+      <v-col cols="12" md="4" lg="5">
+        <v-textarea rows="12" no-resize label="Output" v-model='output_data' variant="outlined"
                     bg-color="grey-lighten-4" color="secondary"></v-textarea>
+      </v-col>
+
+      <v-col cols="12" md="4" lg="2">
+        <v-card variant="tonal">
+          <v-card-title>History</v-card-title>
+          <v-card-item>
+            <v-row style="height: 270px; overflow-y: scroll">
+              <v-col cols="12" v-for="(h, i) in history" :key="i">
+                <v-text-field density="compact" variant="outlined" :model-value="h"></v-text-field>
+              </v-col>
+            </v-row>
+          </v-card-item>
+        </v-card>
       </v-col>
     </v-row>
 
@@ -67,7 +80,6 @@
       </v-col>
     </v-row>
 
-
     <v-snackbar
         v-model="snackbar"
     >
@@ -100,6 +112,7 @@ export default {
     each_delim_end: '',
     snackbar: false,
     snackbar_text: 'Copied to clipboard',
+    history: []
   }),
 
   methods: {
@@ -129,6 +142,9 @@ export default {
         this.total_lines = t.length
         this.output_data = out
         this.total_dup = total_dup
+
+        this.history.unshift(out)
+
         navigator.clipboard.writeText(out)
         this.snackbar = true
       } else {
