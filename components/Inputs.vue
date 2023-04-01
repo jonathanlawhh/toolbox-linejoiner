@@ -2,7 +2,7 @@
   <div>
     <v-row>
       <v-col cols="12">
-        <p>{{ total_lines }} lines | {{ total_dup }} duplicate/s</p>
+        <p>{{ total_lines }} lines | {{ total_dup }} duplicate/s <span v-if="remove_duplicates && total_dup > 0"> removed</span></p>
       </v-col>
       <v-col cols="12" md="4" lg="5">
         <v-textarea rows="12" no-resize variant="outlined" label="Input" v-model='input_data'
@@ -55,13 +55,21 @@
                 <v-col cols="12">
                   <h3>Output configuration</h3>
                 </v-col>
-                <v-col cols="4" md="2" lg="1">
+                <v-col cols="6" md="2" lg="1">
                   <v-text-field label="Start with" variant="outlined" v-model="delim_start"
                                 @change="joinText" color="primary"></v-text-field>
                 </v-col>
-                <v-col cols="4" md="2" lg="1">
+                <v-col cols="6" md="2" lg="1">
                   <v-text-field label="End with" variant="outlined" v-model="delim_end"
                                 @change="joinText" color="primary"></v-text-field>
+                </v-col>
+
+                <v-col cols="6" md="3" lg="2">
+                  <v-checkbox label="Sort output" v-model="sort_output" @change="joinText" color="secondary"></v-checkbox>
+                </v-col>
+
+                <v-col cols="6" md="3" lg="2">
+                  <v-checkbox label="Remove duplicates" v-model="remove_duplicates" @change="joinText" color="secondary"></v-checkbox>
                 </v-col>
               </v-row>
 
@@ -108,6 +116,8 @@ export default {
     total_lines: 0,
     delim_start: '{',
     delim_end: '}',
+    sort_output: true,
+    remove_duplicates: true,
     each_delim_start: '',
     each_delim_end: '',
     snackbar: false,
@@ -127,13 +137,22 @@ export default {
         let unique_input = []
         let total_dup = 0
         t.forEach((el) => {
-          !unique_input.includes(el) ? unique_input.push(el) : total_dup++
+          // If there is a duplicate and remove duplicate is true, do nothing
+          // Else just add the remaining
+          if (unique_input.includes(el)) {
+            total_dup++
+            !this.remove_duplicates && unique_input.push(el)
+          } else {
+            unique_input.push(el)
+          }
         });
 
         for (let i = 0; i < unique_input.length; i++) {
           unique_input[i] = this.each_delim_start ? this.each_delim_start + unique_input[i] : unique_input[i]
           unique_input[i] = this.each_delim_end ? unique_input[i] + this.each_delim_end : unique_input[i]
         }
+
+        this.sort_output && unique_input.sort()
 
         let out = unique_input.join(this.delim)
         out = this.delim_start ? this.delim_start + out : out
@@ -143,7 +162,8 @@ export default {
         this.output_data = out
         this.total_dup = total_dup
 
-        this.history.unshift(out)
+        // If history has such value, no need to add again to reduce history
+        !this.history.includes(out) && this.history.unshift(out)
 
         navigator.clipboard.writeText(out)
         this.snackbar = true
