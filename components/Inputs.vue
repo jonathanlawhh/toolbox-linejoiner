@@ -6,12 +6,12 @@
       </v-col>
       <v-col cols="12" md="4" lg="5">
         <v-textarea rows="12" no-resize variant="outlined" label="Input" v-model='input_data'
-                    @change="joinText" color="primary"></v-textarea>
+                    @change="joinText" color="primary" clearable></v-textarea>
       </v-col>
 
       <v-col cols="12" md="4" lg="5">
         <v-textarea rows="12" no-resize label="Output" v-model='output_data' variant="outlined"
-                    bg-color="grey-lighten-4" color="secondary"></v-textarea>
+                    bg-color="grey-lighten-4" color="secondary" readonly></v-textarea>
       </v-col>
 
       <v-col cols="12" md="4" lg="2">
@@ -20,7 +20,7 @@
           <v-card-item>
             <v-row style="height: 270px; overflow-y: scroll">
               <v-col cols="12" v-for="(h, i) in history" :key="i">
-                <v-text-field density="compact" variant="outlined" :model-value="h"></v-text-field>
+                <v-text-field density="compact" variant="outlined" :model-value="h" readonly></v-text-field>
               </v-col>
             </v-row>
           </v-card-item>

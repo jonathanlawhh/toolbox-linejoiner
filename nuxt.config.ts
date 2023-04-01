@@ -9,9 +9,17 @@ export default defineNuxtConfig({
             charset: 'utf-8',
             viewport: 'width=device-width, initial-scale=1',
             title: 'Line Joiner',
+            link: [
+                {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'}
+            ],
             meta: [
-                {name: 'description', content: 'Ad free website to join each line of text with a delimiter'},
+                {name: 'description', content: 'Ad free website to join each line of text with a delimiter. Many lines, become one line.'},
                 {name: 'author', content: 'Jonathan Law'},
+                { hid: 'og-type', property: 'og:type', content: 'website' },
+                { hid: 'og-title', property: 'og:title', content: 'Line Joiner' },
+                { hid: 'og-desc', property: 'og:description', content: 'Ad free website to join each line of text with a delimiter. Many lines, become one line.' },
+                { hid: 'og-image', property: 'og:image', content: 'https://line-joiner.netlify.app/line-joiner-logo.webp' },
+                { hid: 'og-url', property: 'og:url', content: 'https://line-joiner.netlify.app/' },
             ],
         },
     },
