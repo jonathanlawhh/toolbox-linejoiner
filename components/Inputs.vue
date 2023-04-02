@@ -107,6 +107,8 @@
 </template>
 
 <script>
+import { event } from 'vue-gtag'
+
 export default {
   data: () => ({
     input_data: null,
@@ -181,6 +183,9 @@ export default {
       this.delim = ';'
 
       this.joinText()
+      event('configuration_change', {
+        'config_name': 'default'
+      })
     },
     setConfigSQL() {
       this.each_delim_start = "'"
@@ -190,6 +195,9 @@ export default {
       this.delim = ','
 
       this.joinText()
+      event('configuration_change', {
+        'config_name': 'sql_in'
+      })
     }
   }
 }

@@ -2,6 +2,7 @@ import vuetify from 'vite-plugin-vuetify'
 
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 // @ts-ignore
+// @ts-ignore
 export default defineNuxtConfig({
     ssr: false,
     app: {
@@ -41,4 +42,9 @@ export default defineNuxtConfig({
             ))
         }
     ],
+    runtimeConfig: {
+        public: {
+            google_analytics_id: process.env.google_analytics_id,
+        }
+    }
 })
