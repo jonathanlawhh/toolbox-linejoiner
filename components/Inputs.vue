@@ -33,7 +33,7 @@
       <v-col cols="12">
         <v-expansion-panels>
           <v-expansion-panel>
-            <v-expansion-panel-title>Configuration</v-expansion-panel-title>
+            <v-expansion-panel-title>Configuration: {{ cc.config_name }}</v-expansion-panel-title>
             <v-expansion-panel-text>
               <v-row>
                 <v-col cols="12">
@@ -91,10 +91,18 @@
               <v-row>
                 <v-col cols="12">
                   <h3>Quick settings</h3>
+                  <v-text-field label="Configuration name" class="mt-8" variant="outlined" v-model="cc.config_name" density="compact"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-btn variant="outlined" class="ma-2" @click="setConfigDef">DEFAULT {A;B}</v-btn>
-                  <v-btn variant="outlined" class="ma-2" @click="setConfigSQL">SQL IN ('A','B')</v-btn>
+                  <v-chip v-for="(s, i) in saved_configs" class="ma-2" :key="i" :variant="s.config_name === cc.config_name ? 'elevated' : 'outlined'" @click="updateCurrentConfig(s)" color="secondary">{{
+                      s.config_name
+                    }}
+                  </v-chip>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12">
+                  <v-btn variant="outlined" color="primary" @click="saveConfig">SAVE</v-btn>
                 </v-col>
               </v-row>
             </v-expansion-panel-text>
@@ -127,6 +135,7 @@ import {event} from 'vue-gtag'
 export default {
   data: () => ({
     cc: {
+      config_name: 'DEFAULT',
       delim: ';',
       delim_start: '{',
       delim_end: '}',
@@ -137,6 +146,7 @@ export default {
       substr_start: 0,
       substr_end: 0,
     },
+    saved_configs: [],
     output_data: null,
     input_data: null,
     total_dup: 0,
@@ -145,7 +155,9 @@ export default {
     snackbar_text: 'Copied to clipboard',
     history: []
   }),
-
+  created() {
+    this.getConfig()
+  },
   methods: {
     joinText() {
       if (this.input_data) {
@@ -198,29 +210,61 @@ export default {
         this.total_lines = 0
       }
     },
-    setConfigDef() {
-      this.cc.each_delim_start = ""
-      this.cc.each_delim_end = ""
-      this.cc.delim_start = '{'
-      this.cc.delim_end = '}'
-      this.cc.delim = ';'
+    saveConfig() {
+      if (this.saved_configs) {
+        let exists = false
+        for (let i = 0; i < this.saved_configs.length; i++) {
+          if (this.saved_configs[i].config_name === this.cc.config_name) {
+            this.saved_configs[i] = this.cc
+            exists = true
+            break
+          }
+        }
 
-      this.joinText()
+        !exists && this.saved_configs.push(this.cc)
+      }
+
+      let j = JSON.stringify(this.saved_configs)
+      localStorage.setItem("custom_config", j)
+
+      this.getConfig()
+
       event('configuration_change', {
-        'config_name': 'default'
+        'config_name': 'create_config'
       })
     },
-    setConfigSQL() {
-      this.cc.each_delim_start = "'"
-      this.cc.each_delim_end = "'"
-      this.cc.delim_start = '('
-      this.cc.delim_end = ')'
-      this.cc.delim = ','
-
+    getConfig() {
+      let t = localStorage.getItem('custom_config')
+      let jt = JSON.parse(t)
+      this.saved_configs = jt ? jt : [
+        {
+          config_name: 'DEFAULT',
+          delim: ';',
+          delim_start: '{',
+          delim_end: '}',
+          sort_output: true,
+          remove_duplicates: true,
+          each_delim_start: '',
+          each_delim_end: '',
+          substr_start: 0,
+          substr_end: 0,
+        }, {
+          config_name: 'SQL',
+          delim: ',',
+          delim_start: "(",
+          delim_end: ")",
+          sort_output: true,
+          remove_duplicates: true,
+          each_delim_start: "'",
+          each_delim_end: "'",
+          substr_start: 0,
+          substr_end: 0,
+        },
+      ]
+    },
+    updateCurrentConfig(e) {
+      this.cc = e
       this.joinText()
-      event('configuration_change', {
-        'config_name': 'sql_in'
-      })
     }
   }
 }
