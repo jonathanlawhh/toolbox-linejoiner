@@ -2,7 +2,7 @@
   <div>
     <v-row>
       <v-col cols="12">
-        <p>{{ total_lines }} lines | {{ total_dup }} duplicate/s <span v-if="remove_duplicates && total_dup > 0"> removed</span>
+        <p>{{ total_lines }} lines | {{ total_dup }} duplicate/s <span v-if="cc.remove_duplicates && total_dup > 0"> removed</span>
         </p>
       </v-col>
       <v-col cols="12" md="4" lg="5">
@@ -40,26 +40,26 @@
                   <h3>For each item configuration</h3>
                 </v-col>
                 <v-col cols="4" md="4" lg="2">
-                  <v-text-field label="Delimiter" variant="outlined" v-model="delim" @change="joinText"
+                  <v-text-field label="Delimiter" variant="outlined" v-model="cc.delim" @change="joinText"
                                 color="primary"></v-text-field>
                 </v-col>
                 <v-col cols="4" md="2" lg="1">
-                  <v-text-field label="Start with" variant="outlined" v-model="each_delim_start"
+                  <v-text-field label="Start with" variant="outlined" v-model="cc.each_delim_start"
                                 @change="joinText" color="secondary"></v-text-field>
                 </v-col>
                 <v-col cols="4" md="2" lg="1">
-                  <v-text-field label="End with" variant="outlined" v-model="each_delim_end"
+                  <v-text-field label="End with" variant="outlined" v-model="cc.each_delim_end"
                                 @change="joinText" color="secondary"></v-text-field>
                 </v-col>
 
                 <v-col cols="12"></v-col>
 
                 <v-col cols="6" md="3" lg="2">
-                  <v-text-field label="Substring start position" variant="outlined" v-model="substr_start"
+                  <v-text-field label="Substring start position" variant="outlined" v-model="cc.substr_start"
                                 @change="joinText" color="primary"></v-text-field>
                 </v-col>
                 <v-col cols="6" md="3" lg="2">
-                  <v-text-field label="Substring end position" variant="outlined" v-model="substr_end"
+                  <v-text-field label="Substring end position" variant="outlined" v-model="cc.substr_end"
                                 @change="joinText" color="secondary"></v-text-field>
                 </v-col>
               </v-row>
@@ -69,21 +69,21 @@
                   <h3>Output configuration</h3>
                 </v-col>
                 <v-col cols="6" md="2" lg="1">
-                  <v-text-field label="Start with" variant="outlined" v-model="delim_start"
+                  <v-text-field label="Start with" variant="outlined" v-model="cc.delim_start"
                                 @change="joinText" color="primary"></v-text-field>
                 </v-col>
                 <v-col cols="6" md="2" lg="1">
-                  <v-text-field label="End with" variant="outlined" v-model="delim_end"
+                  <v-text-field label="End with" variant="outlined" v-model="cc.delim_end"
                                 @change="joinText" color="primary"></v-text-field>
                 </v-col>
 
                 <v-col cols="6" md="3" lg="2">
-                  <v-checkbox label="Sort output" v-model="sort_output" @change="joinText"
+                  <v-checkbox label="Sort output" v-model="cc.sort_output" @change="joinText"
                               color="secondary"></v-checkbox>
                 </v-col>
 
                 <v-col cols="6" md="3" lg="2">
-                  <v-checkbox label="Remove duplicates" v-model="remove_duplicates" @change="joinText"
+                  <v-checkbox label="Remove duplicates" v-model="cc.remove_duplicates" @change="joinText"
                               color="secondary"></v-checkbox>
                 </v-col>
               </v-row>
@@ -126,19 +126,21 @@ import {event} from 'vue-gtag'
 
 export default {
   data: () => ({
-    input_data: null,
+    cc: {
+      delim: ';',
+      delim_start: '{',
+      delim_end: '}',
+      sort_output: true,
+      remove_duplicates: true,
+      each_delim_start: '',
+      each_delim_end: '',
+      substr_start: 0,
+      substr_end: 0,
+    },
     output_data: null,
+    input_data: null,
     total_dup: 0,
-    delim: ';',
     total_lines: 0,
-    delim_start: '{',
-    delim_end: '}',
-    sort_output: true,
-    remove_duplicates: true,
-    each_delim_start: '',
-    each_delim_end: '',
-    substr_start: 0,
-    substr_end: 0,
     snackbar: false,
     snackbar_text: 'Copied to clipboard',
     history: []
@@ -160,26 +162,26 @@ export default {
           // Else just add the remaining
           if (unique_input.includes(el)) {
             total_dup++
-            !this.remove_duplicates && unique_input.push(el)
+            !this.cc.remove_duplicates && unique_input.push(el)
           } else {
             unique_input.push(el)
           }
         });
 
         for (let i = 0; i < unique_input.length; i++) {
-          if (this.substr_start > 0 || this.substr_end > 0) {
-            unique_input[i] = unique_input[i].substring(this.substr_start, this.substr_end)
+          if (this.cc.substr_start > 0 || this.cc.substr_end > 0) {
+            unique_input[i] = unique_input[i].substring(this.cc.substr_start, this.cc.substr_end)
           }
 
-          unique_input[i] = this.each_delim_start ? this.each_delim_start + unique_input[i] : unique_input[i]
-          unique_input[i] = this.each_delim_end ? unique_input[i] + this.each_delim_end : unique_input[i]
+          unique_input[i] = this.cc.each_delim_start ? this.cc.each_delim_start + unique_input[i] : unique_input[i]
+          unique_input[i] = this.cc.each_delim_end ? unique_input[i] + this.cc.each_delim_end : unique_input[i]
         }
 
-        this.sort_output && unique_input.sort()
+        this.cc.sort_output && unique_input.sort()
 
-        let out = unique_input.join(this.delim)
-        out = this.delim_start ? this.delim_start + out : out
-        out = this.delim_end ? out + this.delim_end : out
+        let out = unique_input.join(this.cc.delim)
+        out = this.cc.delim_start ? this.cc.delim_start + out : out
+        out = this.cc.delim_end ? out + this.cc.delim_end : out
 
         this.total_lines = t.length
         this.output_data = out
@@ -197,11 +199,11 @@ export default {
       }
     },
     setConfigDef() {
-      this.each_delim_start = ""
-      this.each_delim_end = ""
-      this.delim_start = '{'
-      this.delim_end = '}'
-      this.delim = ';'
+      this.cc.each_delim_start = ""
+      this.cc.each_delim_end = ""
+      this.cc.delim_start = '{'
+      this.cc.delim_end = '}'
+      this.cc.delim = ';'
 
       this.joinText()
       event('configuration_change', {
@@ -209,11 +211,11 @@ export default {
       })
     },
     setConfigSQL() {
-      this.each_delim_start = "'"
-      this.each_delim_end = "'"
-      this.delim_start = '('
-      this.delim_end = ')'
-      this.delim = ','
+      this.cc.each_delim_start = "'"
+      this.cc.each_delim_end = "'"
+      this.cc.delim_start = '('
+      this.cc.delim_end = ')'
+      this.cc.delim = ','
 
       this.joinText()
       event('configuration_change', {
