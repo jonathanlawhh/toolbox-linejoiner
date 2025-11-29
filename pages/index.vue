@@ -11,7 +11,8 @@
       <v-col cols="12">
         <v-card variant="flat">
           <v-card-text style="min-height: 240px">
-            <Inputs></Inputs>
+            This application will be decommisioned. Please bookmark the new link:
+            <a href="https://toolbox.jonathanlawhh.com/linejoiner">https://toolbox.jonathanlawhh.com/linejoiner</a>
           </v-card-text>
         </v-card>
       </v-col>
